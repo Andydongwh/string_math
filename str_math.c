@@ -4,16 +4,16 @@
 
 typedef struct {
     int a;
-    size_t b;
+    int b;
     char* c;
 }str;
 
 
 /*find point*/
-str find_dot(char* string, size_t len) {
+str find_dot(char* string, int len) {
 
-    size_t zeros = 0;
-    size_t l;
+    int zeros = 0;
+    int l;
     for (l = 0; l < len; l++) {
         if ((string[l] != '0') || (string[l] == '0' && string[l+1] == '.')) {
             break;
@@ -60,12 +60,12 @@ void append(char *s) {
 }
 
 /*str1+str2*/
-str integer_add(char* str1, size_t len1, char* str2, size_t len2, char* out, int carry) {
+str integer_add(char* str1, int len1, char* str2, int len2, char* out, int carry) {
     int res; 
-    size_t l1 = len1-1, l2 = len2-1;
-    size_t olen = len1 > len2 ? len1+1 : len2+1;
-    size_t l = olen-1;
-    size_t len ;
+    int l1 = len1-1, l2 = len2-1;
+    int olen = len1 > len2 ? len1+1 : len2+1;
+    int l = olen-1;
+    int len ;
     for (len = len1 < len2 ? len1 : len2; len > 0; l1--, l2--, len--, l--) {
         res = str1[l1] - '0' + str2[l2] - '0' + carry;
         carry = res>9;
@@ -73,13 +73,13 @@ str integer_add(char* str1, size_t len1, char* str2, size_t len2, char* out, int
         out[l] = res+'0';
     }   
 
-    for (; l1 != (size_t)-1; l1--, l--) {
+    for (; l1 >= 0; l1--, l--) {
         res = str1[l1] - '0' + carry;
         carry = res>9;
         res = carry ? res-10: res;
         out[l] = res+'0';
     }
-    for (; l2 != (size_t)-1; l2--, l--) {
+    for (; l2 >= 0; l2--, l--) {
         res = str2[l2] - '0' + carry;
         carry = res>9;
         res = carry ? res-10: res;
@@ -103,19 +103,19 @@ str integer_add(char* str1, size_t len1, char* str2, size_t len2, char* out, int
 }
 
 
-str fraction_add(int type, char* str1, size_t len1, const char* str2, size_t len2, char* out) {
+str fraction_add(int type, char* str1, int len1, const char* str2, int len2, char* out) {
     int carry = 0;
-    size_t left = len1 < len2 ? len1 : len2; 
-    size_t right = len1 > len2 ? len1 : len2; 
+    int left = len1 < len2 ? len1 : len2; 
+    int right = len1 > len2 ? len1 : len2; 
     const char* longer = len1  > len2 ? str1 : str2;
-    size_t olen = right;
-    size_t l = olen-1;
+    int olen = right;
+    int l = olen-1;
     for (--left; --right != left;) {
         out[l--] = longer[right];
     }
 
     size_t res;
-    for (; left != (size_t)-1; --left) {
+    for (; left >= 0; --left) {
         res = str1[left] - '0' + str2[left] - '0' + carry;
         carry = res>9;
         res = carry ? res-10: res;
@@ -135,25 +135,25 @@ str fraction_add(int type, char* str1, size_t len1, const char* str2, size_t len
     return fraction;
 }
 
-void positive_add(int type, char* str1, size_t len1, char* str2, size_t len2, char* out) {
+void positive_add(int type, char* str1, int len1, char* str2, int len2, char* out) {
     str dot1, dot2;
     dot1 = find_dot(str1, len1);
     dot2 = find_dot(str2, len2);
-    size_t dot_pos1 = dot1.a;
-    size_t dot_pos2 = dot2.a;
+    int dot_pos1 = dot1.a;
+    int dot_pos2 = dot2.a;
     len1 = dot1.b;
     len2 = dot2.b;
     str1 = dot1.c;
     str2 = dot2.c;
  
     int carry = 0;
-    size_t olen_fraction = 0;
+    int olen_fraction = 0;
     if (dot_pos1 < len1 || dot_pos2 < len2) {
         char* fraction = out + (dot_pos1 > dot_pos2 ? dot_pos1+1 : dot_pos2+1);
         fraction[0] = '.';
         fraction++;
-        size_t pos1 = dot_pos1 != len1 ? dot_pos1+1 : dot_pos1;
-        size_t pos2 = dot_pos2 != len2 ? dot_pos2+1 : dot_pos2;
+        int pos1 = dot_pos1 != len1 ? dot_pos1+1 : dot_pos1;
+        int pos2 = dot_pos2 != len2 ? dot_pos2+1 : dot_pos2;
         str frac;
         frac = fraction_add(type, str1+pos1, len1-pos1,str2+pos2, len2-pos2, fraction);
         carry = frac.a;
@@ -163,11 +163,11 @@ void positive_add(int type, char* str1, size_t len1, char* str2, size_t len2, ch
     str integer;
     integer = integer_add(str1, dot_pos1, str2, dot_pos2, out, carry);
     int shift = integer.a;
-    size_t olen_integer = integer.b;
+    int olen_integer = integer.b;
 
     if (shift > 0) {
-        size_t olen = olen_integer + olen_fraction + 1;
-        size_t l;
+        int olen = olen_integer + olen_fraction + 1;
+        int l;
         for (l = olen_integer; l < olen; l++) {
             out[l] = out[l+shift];
         }
@@ -176,13 +176,13 @@ void positive_add(int type, char* str1, size_t len1, char* str2, size_t len2, ch
 }
 
 /*str1-str2*/
-str integer_minus(char* str1, size_t len1, char* str2, size_t len2,char* out, int borrow) {
+str integer_minus(char* str1, int len1, char* str2, int len2,char* out, int borrow) {
     int res; 
-    size_t l1 = len1-1, l2 = len2-1;
+    int l1 = len1-1, l2 = len2-1;
     int a,b;
-    size_t olen = len1 > len2 ? len1 : len2;
-    size_t l = olen-1;
-    for (; l2 != (size_t)-1; l1--, l2--, l--) {
+    int olen = len1 > len2 ? len1 : len2;
+    int l = olen-1;
+    for (; l2 >= 0; l1--, l2--, l--) {
         a = str1[l1]-'0' - borrow;
         b = str2[l2] - '0';
         borrow = a < b ? 1 : 0;
@@ -191,7 +191,7 @@ str integer_minus(char* str1, size_t len1, char* str2, size_t len2,char* out, in
         out[l] = res+'0';
     }
 
-    for (; l1 != (size_t)-1; l1--, l--) {
+    for (; l1 != >= 0; l1--, l--) {
         a = str1[l1]-'0' - borrow;
         borrow = a < 0 ? 1 : 0;
         res = a + 10*borrow;
@@ -229,13 +229,13 @@ str integer_minus(char* str1, size_t len1, char* str2, size_t len2,char* out, in
 }
 
 
-str fraction_minus(int type, char* str1, size_t len1, char* str2, size_t len2,char* out) {
+str fraction_minus(int type, char* str1, int len1, char* str2, int len2,char* out) {
     int borrow = 0;
-    size_t left = len1 < len2 ? len1 : len2; 
-    size_t right = len1 > len2 ? len1 : len2; 
+    int left = len1 < len2 ? len1 : len2; 
+    int right = len1 > len2 ? len1 : len2; 
     const char* longer = len1  > len2 ? str1 : str2;
-    size_t olen = right;
-    size_t l = olen-1;
+    int olen = right;
+    int l = olen-1;
     int a, b, res;
 
     if (longer == str2) {
@@ -253,7 +253,7 @@ str fraction_minus(int type, char* str1, size_t len1, char* str2, size_t len2,ch
         }
     }
 
-    for (; left != (size_t)-1; left--) {
+    for (; left >= 0; left--) {
         a = str1[left] - '0' - borrow;
         b = str2[left] - '0';
         borrow = a < b;
@@ -263,12 +263,12 @@ str fraction_minus(int type, char* str1, size_t len1, char* str2, size_t len2,ch
 
     if (type != 0) {
         l = olen-1;
-        for (; l != (size_t)-1; l--) {
+        for (; l >= 0; l--) {
             if (out[l] != '0') {
                 break;
             }
         }
-        olen = l == (size_t)-1 ? 1 : l+1;
+        olen = l == -1 ? 1 : l+1;
     }
     str fraction;
     fraction.a = borrow;
@@ -276,24 +276,24 @@ str fraction_minus(int type, char* str1, size_t len1, char* str2, size_t len2,ch
     return fraction;
 }
 
-void positive_minus(int type, char* str1, size_t len1, char* str2, size_t len2, char* out) {
+void positive_minus(int type, char* str1, int len1, char* str2, int len2, char* out) {
     str dot1, dot2;
     dot1 = find_dot(str1, len1);
     dot2 = find_dot(str2, len2);
-    size_t dot_pos1 = dot1.a;
-    size_t dot_pos2 = dot2.a;
+    int dot_pos1 = dot1.a;
+    int dot_pos2 = dot2.a;
     len1 = dot1.b;
     len2 = dot2.b;
     str1 = dot1.c;
     str2 = dot2.c;
     int borrow = 0;
-    size_t olen_fraction = 0;
+    int olen_fraction = 0;
     if (dot_pos1 < len1 || dot_pos2 < len2) {
         char* fraction = out + dot_pos1;
         fraction[0] = '.';
         fraction++;
-        size_t pos1 = dot_pos1 != len1 ? dot_pos1+1 : dot_pos1;
-        size_t pos2 = dot_pos2 != len2 ? dot_pos2+1 : dot_pos2;
+        int pos1 = dot_pos1 != len1 ? dot_pos1+1 : dot_pos1;
+        int pos2 = dot_pos2 != len2 ? dot_pos2+1 : dot_pos2;
         str frac;
         frac = fraction_minus(type,str1+pos1, len1-pos1,str2+pos2, len2-pos2, fraction);
         borrow = frac.a;
@@ -303,11 +303,11 @@ void positive_minus(int type, char* str1, size_t len1, char* str2, size_t len2, 
     str integer;
     integer = integer_minus(str1, dot_pos1, str2, dot_pos2, out, borrow);
     int shift = integer.a;
-    size_t olen_integer = integer.b;
+    int olen_integer = integer.b;
 
     if (shift > 0) {
-        size_t olen = olen_integer + olen_fraction + 1;
-        size_t l;
+        int olen = olen_integer + olen_fraction + 1;
+        int l;
         for (l = olen_integer; l < olen; l++) {
             out[l] = out[l+shift];
         }
@@ -316,12 +316,12 @@ void positive_minus(int type, char* str1, size_t len1, char* str2, size_t len2, 
 }
 
 
-int find_larger(char* str1, size_t len1, char* str2, size_t len2) {
+int find_larger(char* str1, int len1, char* str2, int len2) {
     str dot1, dot2;
     dot1 = find_dot(str1, len1);
     dot2 = find_dot(str2, len2);
-    size_t dot_pos1 = dot1.a;
-    size_t dot_pos2 = dot2.a;
+    int dot_pos1 = dot1.a;
+    int dot_pos2 = dot2.a;
     len1 = dot1.b;
     len2 = dot2.b;
     str1 = dot1.c;
@@ -365,7 +365,7 @@ int find_larger(char* str1, size_t len1, char* str2, size_t len2) {
     return 0;
 }
 
-void str_minus(int type, char* str1, size_t len1, char* str2, size_t len2, char* out) {
+void str_minus(int type, char* str1, int len1, char* str2, int len2, char* out) {
     int cmp_res;
     if (*str1 == '-' && *str2 == '-') {
         cmp_res = find_larger(str1+1, len1-1, str2+1, len2-1);
@@ -412,7 +412,7 @@ void str_minus(int type, char* str1, size_t len1, char* str2, size_t len2, char*
 }
 
 
-void str_add(int type, char* str1, size_t len1, char* str2, size_t len2, char* out) {
+void str_add(int type, char* str1, int len1, char* str2, int len2, char* out) {
     int cmp_res;
     if (*str1 == '-' && *str2 != '-') {
         cmp_res = find_larger(str1+1, len1-1, str2, len2);
@@ -491,7 +491,6 @@ int str_cmp(char *str1, size_t len1, char *str2, size_t len2) {
     }
 }
 
-/*
 int main(){
     char out[100] = {0};
     char num1[100];
@@ -504,103 +503,14 @@ int main(){
     printf("Please put the type：");
     scanf("%d",&type);
 
-    
-
-    char *a = num1;
-    char *b = num2;
-    size_t len1 = strlen(a);
-    size_t len2 = strlen(b);
-    char *s = out;
-    str_minus(type, a, len1, b, len2, s);
+    size_t len1 = strlen(num1);
+    size_t len2 = strlen(num2);
+    str_add(type, num1, len1, num2, len2, out);
     printf("The result is：");
     puts(s);
+    str_minus(type, num1, len1, num2, len2, out);
+    printf("The result is：");
+    puts(s);
+    int m = str_cmp(num1, len1, num2, len2);
+    printf("The compare result is %d\n",m);
 }
-*/
-int main(){
-    char str1[513][40] = {0};
-    char str2[513][40] = {0};
-    char sum[513][40] = {0};
-    char sub[513][40] = {0};
-    int cmp[513][40] = {0};
-
-    int x = 0;
-    int y = 0;
-    int z = 0;
- 
-    int i;
-    FILE *fp1, *fp2, *fp3,*fp4,*fp5;
-    fp1 = fopen("str1.txt","r");
-    fp2 = fopen("str2.txt","r");
-    fp3 = fopen("sum.txt","r");
-    fp4 = fopen("sub.txt","r");
-    fp5 = fopen("cmp.txt","r");
-
-    for(i=0;i<510;i++){
-        fscanf(fp1,"%s",str1[i]);
-        fscanf(fp2,"%s",str2[i]);
-        fscanf(fp3,"%s",sum[i]);
-        fscanf(fp4,"%s",sub[i]);
-        fscanf(fp5,"%d",cmp[i]);
-
-        char* a = str1[i];
-        char* b = str2[i];
-        char out[100] = {0};
-        size_t len1 = strlen(a);
-        size_t len2 = strlen(b);
-        str_add(0,a,len1,b,len2,out);
-        if(strcmp(out,sum[i]) == 0){
-            x++;
-        }
-        else{
-            printf("out=%s\nsum[i]=%s",out,sum[i]);
-            printf("sum not equal=%d\n",i);
-        }
-        str_minus(0,a,len1,b,len2,out);
-        if(strcmp(out,sub[i]) == 0){
-            y++;
-        }
-        else{
-            printf("out=%s\nsum[i]=%s",out,sum[i]);
-            printf("sub not equal=%d\n",i);
-        }
-        int m = str_cmp(a,len1,b,len2);
-        if(m==*cmp[i]){
-            z++;
-        }
-    }
-    for(i=510;i<513;i++){
-        fscanf(fp1,"%s",str1[i]);
-        fscanf(fp2,"%s",str2[i]);
-        fscanf(fp3,"%s",sum[i]);
-        fscanf(fp4,"%s",sub[i]);
-        fscanf(fp5,"%d",cmp[i]);
-
-        char* a = str1[i];
-        char* b = str2[i];
-        char out[100] = {0};
-        size_t len1 = strlen(a);
-        size_t len2 = strlen(b);
-        str_add(1,a,len1,b,len2,out);
-        if(strcmp(out,sum[i]) == 0){
-            x++;
-        }
-        else{
-            printf("out=%s\nsum[i]=%s",out,sum[i]);
-            printf("sum not equal=%d\n",i);
-        }
-        str_minus(1,a,len1,b,len2,out);
-        if(strcmp(out,sub[i]) == 0){
-            y++;
-        }
-        else{
-            printf("out=%s\nsum[i]=%s",out,sum[i]);
-            printf("sub not equal=%d\n",i);
-        }
-        int m = str_cmp(a,len1,b,len2);
-        if(m==*cmp[i]){
-            z++;
-        }
-    }
-    printf("x=%d\ny=%d\nz=%d\n",x,y,z);
-}
-
